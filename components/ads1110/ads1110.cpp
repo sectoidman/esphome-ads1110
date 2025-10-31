@@ -17,7 +17,7 @@ void ADS1110Component::setup()
     // registers for reading, you can read either
     // 2 (just output) or 3 bytes (output + config)
     uint8_t value[3];
-    if (!this->read(value, 3))
+    if (this->read(value, 3) != NO_ERROR)
     {
         this->mark_failed();
         return;
@@ -85,7 +85,7 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
 
     if (!this->continuous_mode_ || this->prev_config_ != config)
     {
-        if (!this->write(&config, 1))
+        if (this->write(&config, 1) != NO_ERROR)
         {
             this->status_set_warning();
             return NAN;
@@ -93,7 +93,8 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
         this->prev_config_ = config;
 
         // keep reading until we get a fresh sample (DRDY = 0)
-        while (this->read(raw_buffer, 3) && (raw_buffer[2] & 0x80) != 0)
+        while (this->read(raw_buffer, 3) == NO_ERROR &&
+               (raw_buffer[2] & 0x80) != 0)
         {
             if (millis() - start > 100)
             {
