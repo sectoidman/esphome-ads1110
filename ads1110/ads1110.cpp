@@ -100,7 +100,7 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
     memcpy(&output_signed, raw_buffer, sizeof(output_signed));
 
     // Output code = -1 * Min Code * PGA * ((Vin+ - Vin-) / 2.048V)
-    float millivolts;
+    float volts;
     int16_t min_code;
     float gain_factor;
 
@@ -141,13 +141,13 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
             return NAN;
     }
 
-    millivolts = ((-2.048f * output_signed) / (min_code * gain_factor)) * 1000.0f;
+    volts = ((-2.048f * output_signed) / (min_code * gain_factor));
 
     uint32_t t = millis();
-    ESP_LOGI(TAG, "%p: sample time %lu, %lu, %g, %d", this, t, t - start, millivolts, output_signed);
+    ESP_LOGI(TAG, "%p: sample time %lu, %lu, %g, %d", this, t, t - start, volts, output_signed);
 
     this->status_clear_warning();
-    return millivolts;
+    return volts;
 }
 
 
