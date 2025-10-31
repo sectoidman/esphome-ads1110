@@ -105,8 +105,7 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
         }
     }
 
-    int16_t output_signed;
-    memcpy(&output_signed, raw_buffer, sizeof(output_signed));
+    int16_t output_signed = (raw_buffer[1] | (raw_buffer[0] >> 8));
 
     // Output code = -1 * Min Code * PGA * ((Vin+ - Vin-) / 2.048V)
     float volts;
