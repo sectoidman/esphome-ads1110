@@ -9,14 +9,16 @@ namespace ads1110 {
 
 static const char *const TAG = "ads1110";
 
-void ADS1110Component::setup() {
+void ADS1110Component::setup()
+{
     ESP_LOGCONFIG(TAG, "Setting up ADS1110...");
 
     // the ads1110 doesn't let you address individual
     // registers for reading, you can read either
     // 2 (just output) or 3 bytes (output + config)
     uint8_t value[3];
-    if (!this->read(&value, 3)) {
+    if (!this->read(value, 3))
+    {
         this->mark_failed();
         return;
     }
@@ -42,10 +44,12 @@ float ADS1110Component::request_measurement(ADS1110Gain gain, ADS1110Rate rate)
 }
 
 
-void ADS1110Component::dump_config() {
+void ADS1110Component::dump_config()
+{
   ESP_LOGCONFIG(TAG, "ADS1110:");
   LOG_I2C_DEVICE(this);
-  if (this->is_failed()) {
+  if (this->is_failed())
+  {
     ESP_LOGE(TAG, ESP_LOG_MSG_COMM_FAIL);
   }
 }
@@ -79,16 +83,20 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
     uint8_t raw_buffer[3] = {0, 0, 0};
     uint32_t start = millis();
 
-    if (!this->continuous_mode_ || this->prev_config_ != config) {
-        if (!this->write(&config, 1)) {
+    if (!this->continuous_mode_ || this->prev_config_ != config)
+    {
+        if (!this->write(&config, 1))
+        {
             this->status_set_warning();
             return NAN;
         }
         this->prev_config_ = config;
 
         // keep reading until we get a fresh sample (DRDY = 0)
-        while (this->read(&raw_buffer, 3) && (raw_buffer[2] & 0x80) != 0) {
-            if (millis() - start > 100) {
+        while (this->read(raw_buffer, 3) && (raw_buffer[2] & 0x80) != 0)
+        {
+            if (millis() - start > 100)
+            {
                 ESP_LOGW(TAG, "Reading ADS1110 timed out");
                 this->status_set_warning();
                 return NAN;
@@ -104,7 +112,8 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
     int16_t min_code;
     float gain_factor;
 
-    switch (rate) {
+    switch (rate)
+    {
         case ADS1110_15SPS_16B:
             min_code = INT16_MIN;
             break;
@@ -123,7 +132,8 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
 
     }
 
-    switch (gain) {
+    switch (gain)
+    {
         case ADS1110_GAIN_1:
             gain_factor = 1.0f;
             break;
@@ -150,4 +160,5 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
     return volts;
 }
 
-
+} // ads1110
+} // esphome
