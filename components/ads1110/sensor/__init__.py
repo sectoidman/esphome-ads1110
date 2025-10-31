@@ -64,4 +64,4 @@ async def to_code(config):
     await cg.register_parented(var, config[CONF_ADS1110_ID])
 
     cg.add(var.set_gain(config[CONF_GAIN]))
-    cg.add(var.set_resolution(config[CONF_RATE]))
+    cg.add(var.set_rate(config[CONF_RATE]))
