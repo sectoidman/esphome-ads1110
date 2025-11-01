@@ -73,11 +73,13 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
     {
         // Start conversion (set DRDY)
         config |= 1 << 7;
+        // set SC bit (set single conversion mode)
+        config |= 1 << 4;
     }
     else
     {
-        // set continuous mode (SC) bit
-        config |= 1 << 4;
+        // Clear SC bit (set continuous conversion mode)
+        config &= ~(1 << 4);
     }
 
     uint8_t raw_buffer[3] = {0, 0, 0};
@@ -91,17 +93,17 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
             return NAN;
         }
         this->prev_config_ = config;
+    }
 
-        // keep reading until we get a fresh sample (DRDY = 0)
-        while (this->read(raw_buffer, 3) == i2c::NO_ERROR &&
-               (raw_buffer[2] & 0x80) != 0)
+    // keep reading until we get a fresh sample (DRDY = 0)
+    while (this->read(raw_buffer, 3) == i2c::NO_ERROR &&
+           (raw_buffer[2] & 0x80) != 0)
+    {
+        if (millis() - start > 100)
         {
-            if (millis() - start > 100)
-            {
-                ESP_LOGW(TAG, "Reading ADS1110 timed out");
-                this->status_set_warning();
-                return NAN;
-            }
+            ESP_LOGW(TAG, "Reading ADS1110 timed out");
+            this->status_set_warning();
+            return NAN;
         }
     }
 
@@ -154,11 +156,11 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
     volts = ((-2.048f * output_signed) / (min_code * gain_factor));
 
     uint32_t t = millis();
-    ESP_LOGV(TAG, "%p: sample time %lu\n"
-                  "duration (ms): %lu\n"
-                  "raw volts: %g\n"
-                  "raw counts: %d"
-                  , this, t, t - start, volts, output_signed);
+    ESP_LOGV(TAG, "\n\tsample time %lu\n"
+                  "\tduration (ms): %lu\n"
+                  "\traw volts: %g\n"
+                  "\traw counts: %d"
+                  , t, t - start, volts, output_signed);
 
     this->status_clear_warning();
     return volts;
