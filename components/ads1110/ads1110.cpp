@@ -154,7 +154,11 @@ float ADS1110Component::_request_measurement(ADS1110Gain gain,
     volts = ((-2.048f * output_signed) / (min_code * gain_factor));
 
     uint32_t t = millis();
-    ESP_LOGI(TAG, "%p: sample time %lu, %lu, %g, %d", this, t, t - start, volts, output_signed);
+    ESP_LOGV(TAG, "%p: sample time %lu\n"
+                  "duration (ms): %lu\n"
+                  "raw volts: %g\n"
+                  "raw counts: %d"
+                  , this, t, t - start, volts, output_signed);
 
     this->status_clear_warning();
     return volts;
